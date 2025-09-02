@@ -8,9 +8,9 @@ namespace ExpenseTrackerAPI.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ExpenseTrackerDbContext _context;
+        private readonly AppDbContext _context;
 
-        public CategoryController(ExpenseTrackerDbContext context)
+        public CategoryController(AppDbContext context)
         {
             _context = context;
         }

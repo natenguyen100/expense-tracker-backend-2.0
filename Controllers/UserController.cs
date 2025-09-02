@@ -8,9 +8,9 @@ namespace ExpenseTrackerAPI.Controllers
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly ExpenseTrackerDbContext _context;
+        private readonly AppDbContext _context;
 
-        public UserController(ExpenseTrackerDbContext context)
+        public UserController(AppDbContext context)
         {
             _context = context;
         }
