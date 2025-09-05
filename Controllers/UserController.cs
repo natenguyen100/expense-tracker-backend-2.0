@@ -18,7 +18,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers()
         {
-            var result = await _context.UserAccount
+            var result = await _context.Users
                 .Select(user => new
                 {
                     id = user.id,
@@ -35,7 +35,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpGet("GetUser/{email}")]
         public async Task<IActionResult> GetUser(string email)
         {
-            var user = await _context.UserAccount
+            var user = await _context.Users
             .Where(user => user.email == email)
             .Select(user => new
             {
@@ -58,7 +58,7 @@ namespace ExpenseTrackerAPI.Controllers
         [HttpPost("CreateUser")]
         public async Task<IActionResult> CreateUser([FromBody] UserAccount user)
         {
-            _context.UserAccount.Add(user);
+            _context.Users.Add(user);
             await _context.SaveChangesAsync();
 
             return Ok(user);

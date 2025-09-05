@@ -8,6 +8,6 @@ namespace ExpenseTrackerAPI.Models
         public required string email { get; set; }
         public required string password_hashed { get; set; }
         public DateTime created_at { get; set; }
-        public DateTime update_at { get; set; }
+        public DateTime updated_at { get; set; }
     }
 }
