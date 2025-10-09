@@ -1,5 +1,4 @@
 using ExpenseTrackerAPI.Models;
-using JWTAuth.Entities;
 using JWTAuth.Models;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,7 +12,7 @@ namespace JWTAuth.Services
 {
     public class AuthServices(AppDbContext context, IConfiguration configuration) : IAuthService
     {
-        public async Task<UserAccount?> RegisterAsync(UserDto request)
+        public async Task<UserAccount?> SignUpAsync(UserDto request)
         {
 
             if (await context.Users.AnyAsync(user => user.email == request.email))
@@ -25,8 +24,8 @@ namespace JWTAuth.Services
             {
                 id = Guid.NewGuid(),
                 email = request.email,
-                first_name = "",
-                last_name = "",
+                first_name = request.first_name,
+                last_name = request.last_name, 
                 password_hashed = "",
                 created_at = DateTime.UtcNow,
                 updated_at = DateTime.UtcNow
@@ -43,7 +42,7 @@ namespace JWTAuth.Services
             return user;
         }
 
-        public async Task<TokenResponseDto?> LoginAsync(UserDto request)
+        public async Task<TokenResponseDto?> SignInAsync(UserDto request)
         {
             var user = await context.Users.FirstOrDefaultAsync(user => user.email == request.email);
             if (user is null)
@@ -129,7 +128,7 @@ namespace JWTAuth.Services
             return new JwtSecurityTokenHandler().WriteToken(tokenDescriptor);
         }
 
-        public async Task<bool> LogoutAsync(LogoutRequestDto request)
+        public async Task<bool> SignOutAsync(SignOutRequestDto request)
         {
             if (string.IsNullOrEmpty(request.RefreshToken))
                 return false;

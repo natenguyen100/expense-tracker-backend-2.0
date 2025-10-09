@@ -6,9 +6,9 @@ namespace JWTAuth.Services
 {
     public interface IAuthService
     {
-        Task<UserAccount?> RegisterAsync(UserDto request);
-        Task<TokenResponseDto?> LoginAsync(UserDto request);
+        Task<UserAccount?> SignUpAsync(UserDto request);
+        Task<TokenResponseDto?> SignInAsync(UserDto request);
         Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request);
-        Task<bool> LogoutAsync(LogoutRequestDto request);
+        Task<bool> SignOutAsync(SignOutRequestDto request);
     }
 }

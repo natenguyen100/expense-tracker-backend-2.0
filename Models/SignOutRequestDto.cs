@@ -1,6 +1,6 @@
 namespace JWTAuth.Models
 {
-    public class LogoutRequestDto
+    public class SignOutRequestDto
     {
         public string RefreshToken { get; set; } = string.Empty;
     }

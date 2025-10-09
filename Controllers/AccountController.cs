@@ -9,31 +9,31 @@ namespace JWTAuth.Models.Controllers
     [ApiController]
     public class AccountController(IAuthService authService) : ControllerBase
     {
-        [HttpPost("register")]
-        public async Task<ActionResult<User>> Register(UserDto request)
+        [HttpPost("signup")]
+        public async Task<ActionResult<User>> SignUp(UserDto request)
         {
-            var user = await authService.RegisterAsync(request);
+            var user = await authService.SignUpAsync(request);
             if (user is null)
                 return BadRequest("Username already exists.");
     
             return Ok(user);
         }
 
-        [HttpPost("login")]
-        public async Task<ActionResult<TokenResponseDto>> Login(UserDto request)
+        [HttpPost("signin")]
+        public async Task<ActionResult<TokenResponseDto>> SignIn(UserDto request)
         {
-            var result = await authService.LoginAsync(request);
+            Console.WriteLine("signin request", request);
+            var result = await authService.SignInAsync(request);
             if (result is null)
                 return BadRequest("Invalid username or password.");
 
             return Ok(result);
         }
 
-         [Authorize]
-         [HttpPost("logout")]
-         public async Task<IActionResult> Logout(LogoutRequestDto request)
+        [HttpPost("signout")]
+         public async Task<IActionResult> SignOut(SignOutRequestDto request)
          {
-            var result = await authService.LogoutAsync(request);
+            var result = await authService.SignOutAsync(request);
             if (!result)
                 return BadRequest("Logout failed or invalid refresh token.");
             return Ok(new { Message = "Successfully logged out." });
