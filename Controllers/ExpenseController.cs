@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 
 namespace ExpenseTrackerAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ExpenseController : ControllerBase
@@ -16,70 +19,152 @@ namespace ExpenseTrackerAPI.Controllers
             _context = context;
         }
 
+        private Guid GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                throw new UnauthorizedAccessException("User ID not found in token");
+            }
+            return Guid.Parse(userIdClaim);
+        }
+
         [HttpGet("GetExpense")]
         public async Task<ActionResult<IEnumerable<Expense>>> GetExpense()
         {
-            return await _context.Expense.ToListAsync();
+            try
+            {
+                var userId = GetCurrentUserId();
+                
+                return await _context.Expense
+                    .Where(e => e.user_id == userId)
+                    .OrderByDescending(e => e.expense_date)
+                    .ToListAsync();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid user authentication");
+            }
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Expense>> GetExpense(Guid id)
         {
-            var expense = await _context.Expense.FindAsync(id);
-            if (expense == null)
-                return NotFound();
+            try
+            {
+                var userId = GetCurrentUserId();
+                
+                var expense = await _context.Expense
+                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    
+                if (expense == null)
+                    return NotFound();
 
-            return expense;
+                return expense;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid user authentication");
+            }
         }
 
         [HttpPost]
         public async Task<ActionResult<Expense>> CreateExpense(Expense expense)
         {
-            expense.id = Guid.NewGuid();
-            expense.created_at = DateTime.UtcNow;
-            expense.updated_at = DateTime.UtcNow;
+            try
+            {
+                expense.user_id = GetCurrentUserId();
+                expense.id = Guid.NewGuid();
+                expense.created_at = DateTime.UtcNow;
+                expense.updated_at = DateTime.UtcNow;
 
-            _context.Expense.Add(expense);
-            await _context.SaveChangesAsync();
+                _context.Expense.Add(expense);
+                await _context.SaveChangesAsync();
 
-            return CreatedAtAction(nameof(GetExpense), new { id = expense.id }, expense);
+                return CreatedAtAction(nameof(GetExpense), new { id = expense.id }, expense);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid user authentication");
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest($"Error creating expense: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateExpense(Guid id, Expense expense)
         {
             if (id != expense.id)
-                return BadRequest();
-
-            expense.updated_at = DateTime.UtcNow;
-            _context.Entry(expense).State = EntityState.Modified;
+                return BadRequest("ID mismatch");
 
             try
             {
+                var userId = GetCurrentUserId();
+                
+                var existingExpense = await _context.Expense
+                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    
+                if (existingExpense == null)
+                    return NotFound();
+
+                existingExpense.name = expense.name;
+                existingExpense.amount = expense.amount;
+                existingExpense.currency = expense.currency;
+                existingExpense.description = expense.description;
+                existingExpense.expense_date = expense.expense_date;
+                existingExpense.payment_method = expense.payment_method;
+                existingExpense.receipt_url = expense.receipt_url;
+                existingExpense.is_recurring = expense.is_recurring;
+                existingExpense.recurring_frequency = expense.recurring_frequency;
+                existingExpense.recurring_end_date = expense.recurring_end_date;
+                existingExpense.category_id = expense.category_id;
+                existingExpense.updated_at = DateTime.UtcNow;
+
                 await _context.SaveChangesAsync();
+                
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid user authentication");
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Expense.Any(expense => expense.id == id))
+                if (!_context.Expense.Any(e => e.id == id))
                     return NotFound();
                 else
                     throw;
             }
-
-            return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteExpense(Guid id)
         {
-            var expense = await _context.Expense.FindAsync(id);
-            if (expense == null)
-                return NotFound();
+            try
+            {
+                var userId = GetCurrentUserId();
+                
+                var expense = await _context.Expense
+                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    
+                if (expense == null)
+                    return NotFound();
 
-            _context.Expense.Remove(expense);
-            await _context.SaveChangesAsync();
+                _context.Expense.Remove(expense);
+                await _context.SaveChangesAsync();
 
-            return NoContent();
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized("Invalid user authentication");
+            }
+            catch (DbUpdateException ex)
+            {
+                return BadRequest($"Error deleting expense: {ex.Message}");
+            }
         }
     }
 }

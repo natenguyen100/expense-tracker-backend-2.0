@@ -5,6 +5,7 @@ namespace ExpenseTrackerAPI.Models
         public Guid id { get; set; }
         public Guid user_id { get; set; }
         public Guid? category_id { get; set; }
+        public string? name { get; set; }
         public decimal amount { get; set; }
         public string currency { get; set; } = "USD";
         public string? description { get; set; }
