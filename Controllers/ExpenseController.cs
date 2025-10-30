@@ -77,6 +77,16 @@ namespace ExpenseTrackerAPI.Controllers
                 expense.id = Guid.NewGuid();
                 expense.created_at = DateTime.UtcNow;
                 expense.updated_at = DateTime.UtcNow;
+                
+                if (expense.expense_date.Kind == DateTimeKind.Unspecified)
+                {
+                    expense.expense_date = DateTime.SpecifyKind(expense.expense_date, DateTimeKind.Utc);
+                }
+                
+                if (expense.recurring_end_date.HasValue && expense.recurring_end_date.Value.Kind == DateTimeKind.Unspecified)
+                {
+                    expense.recurring_end_date = DateTime.SpecifyKind(expense.recurring_end_date.Value, DateTimeKind.Utc);
+                }
 
                 _context.Expense.Add(expense);
                 await _context.SaveChangesAsync();
@@ -89,7 +99,12 @@ namespace ExpenseTrackerAPI.Controllers
             }
             catch (DbUpdateException ex)
             {
-                return BadRequest($"Error creating expense: {ex.Message}");
+                var errorMessage = $"Error creating expense: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner Exception: {ex.InnerException.Message}";
+                }
+                return BadRequest(errorMessage);
             }
         }
 
@@ -113,12 +128,30 @@ namespace ExpenseTrackerAPI.Controllers
                 existingExpense.amount = expense.amount;
                 existingExpense.currency = expense.currency;
                 existingExpense.description = expense.description;
-                existingExpense.expense_date = expense.expense_date;
+                
+                if (expense.expense_date.Kind == DateTimeKind.Unspecified)
+                {
+                    existingExpense.expense_date = DateTime.SpecifyKind(expense.expense_date, DateTimeKind.Utc);
+                }
+                else
+                {
+                    existingExpense.expense_date = expense.expense_date;
+                }
+                
                 existingExpense.payment_method = expense.payment_method;
                 existingExpense.receipt_url = expense.receipt_url;
                 existingExpense.is_recurring = expense.is_recurring;
                 existingExpense.recurring_frequency = expense.recurring_frequency;
-                existingExpense.recurring_end_date = expense.recurring_end_date;
+
+                if (expense.recurring_end_date.HasValue && expense.recurring_end_date.Value.Kind == DateTimeKind.Unspecified)
+                {
+                    existingExpense.recurring_end_date = DateTime.SpecifyKind(expense.recurring_end_date.Value, DateTimeKind.Utc);
+                }
+                else
+                {
+                    existingExpense.recurring_end_date = expense.recurring_end_date;
+                }
+                
                 existingExpense.category_id = expense.category_id;
                 existingExpense.updated_at = DateTime.UtcNow;
 
@@ -163,7 +196,12 @@ namespace ExpenseTrackerAPI.Controllers
             }
             catch (DbUpdateException ex)
             {
-                return BadRequest($"Error deleting expense: {ex.Message}");
+                var errorMessage = $"Error deleting expense: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner Exception: {ex.InnerException.Message}";
+                }
+                return BadRequest(errorMessage);
             }
         }
     }
