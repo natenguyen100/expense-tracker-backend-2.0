@@ -7,6 +7,7 @@ namespace ExpenseTrackerAPI.Models
         public required string last_name { get; set; }
         public required string email { get; set; }
         public required string password_hashed { get; set; }
+        public required decimal total_income { get; set; }
         public DateTime created_at { get; set; }
         public DateTime updated_at { get; set; }
         public string? RefreshToken { get; set; }

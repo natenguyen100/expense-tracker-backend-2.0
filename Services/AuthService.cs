@@ -28,7 +28,8 @@ namespace JWTAuth.Services
                 last_name = request.last_name, 
                 password_hashed = "",
                 created_at = DateTime.UtcNow,
-                updated_at = DateTime.UtcNow
+                updated_at = DateTime.UtcNow,
+                total_income = request.total_income
             };
 
             var hashedPassword = new PasswordHasher<UserAccount>()
@@ -58,7 +59,7 @@ namespace JWTAuth.Services
             return await CreateTokenResponse(user);
         }
 
-        private async Task<TokenResponseDto> CreateTokenResponse(UserAccount? user)
+        private async Task<TokenResponseDto> CreateTokenResponse(UserAccount user)
         {
             return new TokenResponseDto
             {

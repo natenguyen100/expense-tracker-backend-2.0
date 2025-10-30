@@ -25,7 +25,8 @@ namespace ExpenseTrackerAPI.Controllers
                     first_name = user.first_name,
                     last_name = user.last_name,
                     email = user.email,
-                    password_hashed = user.password_hashed
+                    password_hashed = user.password_hashed,
+                    total_income = user.total_income
                 })
                 .ToListAsync();
 
@@ -43,7 +44,8 @@ namespace ExpenseTrackerAPI.Controllers
                 first_name = user.first_name,
                 last_name = user.last_name,
                 email = user.email,
-                password_hashed = user.password_hashed
+                password_hashed = user.password_hashed,
+                total_income = user.total_income
             })
             .FirstOrDefaultAsync();
 
@@ -63,5 +65,45 @@ namespace ExpenseTrackerAPI.Controllers
 
             return Ok(user);
         }
+
+        [HttpPatch("UpdateUserIncome/{email}")]
+        public async Task<IActionResult> UpdateUserIncome(string email, [FromBody] decimal newIncome)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return BadRequest(new { message = "Email is required" });
+            }
+
+            if (newIncome < 0)
+            {
+                return BadRequest(new { message = "Income cannot be negative" });
+            }
+
+            var user = await _context.Users
+                .FirstOrDefaultAsync(u => u.email.ToLower() == email.ToLower());
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            user.total_income = newIncome;
+            user.updated_at = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            var result = new
+            {
+                id = user.id,
+                first_name = user.first_name,
+                last_name = user.last_name,
+                email = user.email,
+                password_hashed = user.password_hashed,
+                total_income = user.total_income
+            };
+
+            return Ok(result);
+        }
+                
     }
 }

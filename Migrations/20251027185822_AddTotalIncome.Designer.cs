@@ -3,6 +3,7 @@ using System;
 using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace ExpenseTrackerAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251027185822_AddTotalIncome")]
+    partial class AddTotalIncome
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -190,8 +193,9 @@ namespace ExpenseTrackerAPI.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<decimal>("total_income")
-                        .HasColumnType("numeric");
+                    b.Property<string>("total_income")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("updated_at")
                         .HasColumnType("timestamp with time zone");
