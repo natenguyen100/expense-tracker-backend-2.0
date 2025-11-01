@@ -30,16 +30,39 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetExpense")]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetExpense()
+        public async Task<ActionResult<IEnumerable<object>>> GetExpense()
         {
             try
             {
                 var userId = GetCurrentUserId();
                 
-                return await _context.Expense
+                var expenses = await _context.Expense
                     .Where(e => e.user_id == userId)
                     .OrderByDescending(e => e.expense_date)
+                    .Select(e => new
+                    {
+                        id = e.id,
+                        userId = e.user_id,
+                        categoryId = e.category_id,
+                        category = e.category_id.HasValue 
+                            ? _context.Category.Where(c => c.id == e.category_id.Value).Select(c => c.name).FirstOrDefault()
+                            : null,
+                        name = e.name,
+                        amount = e.amount,
+                        currency = e.currency,
+                        description = e.description,
+                        expenseDate = e.expense_date,
+                        paymentMethod = e.payment_method,
+                        receiptUrl = e.receipt_url,
+                        isRecurring = e.is_recurring,
+                        recurringFrequency = e.recurring_frequency,
+                        recurringEndDate = e.recurring_end_date,
+                        createdAt = e.created_at,
+                        updatedAt = e.updated_at
+                    })
                     .ToListAsync();
+                    
+                return Ok(expenses);
             }
             catch (UnauthorizedAccessException)
             {
@@ -48,14 +71,36 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<Expense>> GetExpense(Guid id)
+        public async Task<ActionResult<object>> GetExpense(Guid id)
         {
             try
             {
                 var userId = GetCurrentUserId();
                 
                 var expense = await _context.Expense
-                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    .Where(e => e.id == id && e.user_id == userId)
+                    .Select(e => new
+                    {
+                        id = e.id,
+                        userId = e.user_id,
+                        categoryId = e.category_id,
+                        category = e.category_id.HasValue 
+                            ? _context.Category.Where(c => c.id == e.category_id.Value).Select(c => c.name).FirstOrDefault()
+                            : null,
+                        name = e.name,
+                        amount = e.amount,
+                        currency = e.currency,
+                        description = e.description,
+                        expenseDate = e.expense_date,
+                        paymentMethod = e.payment_method,
+                        receiptUrl = e.receipt_url,
+                        isRecurring = e.is_recurring,
+                        recurringFrequency = e.recurring_frequency,
+                        recurringEndDate = e.recurring_end_date,
+                        createdAt = e.created_at,
+                        updatedAt = e.updated_at
+                    })
+                    .FirstOrDefaultAsync();
                     
                 if (expense == null)
                     return NotFound();
