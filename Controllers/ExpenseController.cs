@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using ExpenseTrackerAPI.Extensions;
 
 
 namespace ExpenseTrackerAPI.Controllers
@@ -78,15 +79,8 @@ namespace ExpenseTrackerAPI.Controllers
                 expense.created_at = DateTime.UtcNow;
                 expense.updated_at = DateTime.UtcNow;
                 
-                if (expense.expense_date.Kind == DateTimeKind.Unspecified)
-                {
-                    expense.expense_date = DateTime.SpecifyKind(expense.expense_date, DateTimeKind.Utc);
-                }
-                
-                if (expense.recurring_end_date.HasValue && expense.recurring_end_date.Value.Kind == DateTimeKind.Unspecified)
-                {
-                    expense.recurring_end_date = DateTime.SpecifyKind(expense.recurring_end_date.Value, DateTimeKind.Utc);
-                }
+                expense.expense_date = expense.expense_date.AsUtc();
+                expense.recurring_end_date = expense.recurring_end_date.AsUtc();
 
                 _context.Expense.Add(expense);
                 await _context.SaveChangesAsync();
@@ -128,30 +122,12 @@ namespace ExpenseTrackerAPI.Controllers
                 existingExpense.amount = expense.amount;
                 existingExpense.currency = expense.currency;
                 existingExpense.description = expense.description;
-                
-                if (expense.expense_date.Kind == DateTimeKind.Unspecified)
-                {
-                    existingExpense.expense_date = DateTime.SpecifyKind(expense.expense_date, DateTimeKind.Utc);
-                }
-                else
-                {
-                    existingExpense.expense_date = expense.expense_date;
-                }
-                
+                existingExpense.expense_date = expense.expense_date.AsUtc();
                 existingExpense.payment_method = expense.payment_method;
                 existingExpense.receipt_url = expense.receipt_url;
                 existingExpense.is_recurring = expense.is_recurring;
                 existingExpense.recurring_frequency = expense.recurring_frequency;
-
-                if (expense.recurring_end_date.HasValue && expense.recurring_end_date.Value.Kind == DateTimeKind.Unspecified)
-                {
-                    existingExpense.recurring_end_date = DateTime.SpecifyKind(expense.recurring_end_date.Value, DateTimeKind.Utc);
-                }
-                else
-                {
-                    existingExpense.recurring_end_date = expense.recurring_end_date;
-                }
-                
+                existingExpense.recurring_end_date = expense.recurring_end_date.AsUtc();
                 existingExpense.category_id = expense.category_id;
                 existingExpense.updated_at = DateTime.UtcNow;
 
