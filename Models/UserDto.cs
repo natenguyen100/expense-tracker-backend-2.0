@@ -6,5 +6,6 @@ namespace JWTAuth.Models
         public string password { get; set; } = string.Empty;
         public string first_name { get; set; } = string.Empty;
         public string last_name { get; set; } = string.Empty;
+        public decimal total_income { get; set; } = 0;
     }
 }

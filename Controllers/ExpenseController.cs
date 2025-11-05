@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using ExpenseTrackerAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using ExpenseTrackerAPI.Extensions;
 
 
 namespace ExpenseTrackerAPI.Controllers
@@ -77,6 +78,9 @@ namespace ExpenseTrackerAPI.Controllers
                 expense.id = Guid.NewGuid();
                 expense.created_at = DateTime.UtcNow;
                 expense.updated_at = DateTime.UtcNow;
+                
+                expense.expense_date = expense.expense_date.AsUtc();
+                expense.recurring_end_date = expense.recurring_end_date.AsUtc();
 
                 _context.Expense.Add(expense);
                 await _context.SaveChangesAsync();
@@ -89,7 +93,12 @@ namespace ExpenseTrackerAPI.Controllers
             }
             catch (DbUpdateException ex)
             {
-                return BadRequest($"Error creating expense: {ex.Message}");
+                var errorMessage = $"Error creating expense: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner Exception: {ex.InnerException.Message}";
+                }
+                return BadRequest(errorMessage);
             }
         }
 
@@ -113,12 +122,12 @@ namespace ExpenseTrackerAPI.Controllers
                 existingExpense.amount = expense.amount;
                 existingExpense.currency = expense.currency;
                 existingExpense.description = expense.description;
-                existingExpense.expense_date = expense.expense_date;
+                existingExpense.expense_date = expense.expense_date.AsUtc();
                 existingExpense.payment_method = expense.payment_method;
                 existingExpense.receipt_url = expense.receipt_url;
                 existingExpense.is_recurring = expense.is_recurring;
                 existingExpense.recurring_frequency = expense.recurring_frequency;
-                existingExpense.recurring_end_date = expense.recurring_end_date;
+                existingExpense.recurring_end_date = expense.recurring_end_date.AsUtc();
                 existingExpense.category_id = expense.category_id;
                 existingExpense.updated_at = DateTime.UtcNow;
 
@@ -163,7 +172,12 @@ namespace ExpenseTrackerAPI.Controllers
             }
             catch (DbUpdateException ex)
             {
-                return BadRequest($"Error deleting expense: {ex.Message}");
+                var errorMessage = $"Error deleting expense: {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    errorMessage += $" Inner Exception: {ex.InnerException.Message}";
+                }
+                return BadRequest(errorMessage);
             }
         }
     }
