@@ -64,7 +64,15 @@ namespace JWTAuth.Services
             return new TokenResponseDto
             {
                 AccessToken = CreateToken(user),
-                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user),
+                User = new UserResponseDto
+                {
+                    Id = user.id,
+                    Email = user.email,
+                    FirstName = user.first_name,
+                    LastName = user.last_name,
+                    TotalIncome = user.total_income
+                }
             };
         }
 
