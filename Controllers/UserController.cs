@@ -15,6 +15,30 @@ namespace ExpenseTrackerAPI.Controllers
             _context = context;
         }
 
+        [HttpGet("GetUserById/{id}")]
+        public async Task<IActionResult> GetUserById(Guid id)
+        {
+            var user = await _context.Users
+            .Where(user => user.id == id)
+            .Select(user => new
+            {
+                id = user.id,
+                first_name = user.first_name,
+                last_name = user.last_name,
+                email = user.email,
+                password_hashed = user.password_hashed,
+                total_income = user.total_income
+            })
+            .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            return Ok(user);
+        }
+
         [HttpGet("GetUsers")]
         public async Task<IActionResult> GetUsers()
         {
