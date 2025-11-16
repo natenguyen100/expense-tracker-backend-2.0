@@ -31,16 +31,39 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetExpense")]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetExpense()
+        public async Task<ActionResult<IEnumerable<object>>> GetExpense()
         {
             try
             {
                 var userId = GetCurrentUserId();
                 
-                return await _context.Expense
+                var expenses = await _context.Expense
                     .Where(e => e.user_id == userId)
                     .OrderByDescending(e => e.expense_date)
+                    .Select(e => new
+                    {
+                        e.id,
+                        e.user_id,
+                        e.category_id,
+                        category_name = e.category_id != null 
+                            ? _context.Category.FirstOrDefault(c => c.id == e.category_id).name 
+                            : null,
+                        e.name,
+                        e.amount,
+                        e.currency,
+                        e.description,
+                        e.expense_date,
+                        e.payment_method,
+                        e.receipt_url,
+                        e.is_recurring,
+                        e.recurring_frequency,
+                        e.recurring_end_date,
+                        e.created_at,
+                        e.updated_at
+                    })
                     .ToListAsync();
+                    
+                return Ok(expenses);
             }
             catch (UnauthorizedAccessException)
             {
