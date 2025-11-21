@@ -37,9 +37,35 @@ namespace ExpenseTrackerAPI.Controllers
             {
                 var userId = GetCurrentUserId();
                 
+<<<<<<< Updated upstream
                 return await _context.Expense
                     .Where(e => e.user_id == userId)
                     .OrderByDescending(e => e.expense_date)
+=======
+                var expenses = await _context.Expense
+                    .Include(expense => expense.Category)
+                    .Where(expense => expense.user_id == userId)
+                    .OrderByDescending(expense => expense.expense_date)
+                    .Select(expense => new
+                    {
+                        expense.id,
+                        expense.user_id,
+                        expense.category_id,
+                        category_name = expense.Category != null ? expense.Category.name : null,
+                        expense.name,
+                        expense.amount,
+                        expense.currency,
+                        expense.description,
+                        expense.expense_date,
+                        expense.payment_method,
+                        expense.receipt_url,
+                        expense.is_recurring,
+                        expense.recurring_frequency,
+                        expense.recurring_end_date,
+                        expense.created_at,
+                        expense.updated_at
+                    })
+>>>>>>> Stashed changes
                     .ToListAsync();
             }
             catch (UnauthorizedAccessException)
