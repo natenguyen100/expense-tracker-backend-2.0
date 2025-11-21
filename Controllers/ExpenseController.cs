@@ -46,7 +46,7 @@ namespace ExpenseTrackerAPI.Controllers
                         expense.id,
                         expense.user_id,
                         expense.category_id,
-                        category_name = expense.category_id != null ? expense.Category.name : null,
+                        category_name = expense.Category != null ? expense.Category.name : null,
                         expense.name,
                         expense.amount,
                         expense.currency,
