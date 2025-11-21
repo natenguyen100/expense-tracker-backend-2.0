@@ -31,17 +31,12 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetExpenses")]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetExpense()
+        public async Task<IActionResult> GetExpense()
         {
             try
             {
                 var userId = GetCurrentUserId();
                 
-<<<<<<< Updated upstream
-                return await _context.Expense
-                    .Where(e => e.user_id == userId)
-                    .OrderByDescending(e => e.expense_date)
-=======
                 var expenses = await _context.Expense
                     .Include(expense => expense.Category)
                     .Where(expense => expense.user_id == userId)
@@ -65,8 +60,9 @@ namespace ExpenseTrackerAPI.Controllers
                         expense.created_at,
                         expense.updated_at
                     })
->>>>>>> Stashed changes
                     .ToListAsync();
+
+                return Ok(expenses);
             }
             catch (UnauthorizedAccessException)
             {
