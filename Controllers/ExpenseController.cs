@@ -61,7 +61,7 @@ namespace ExpenseTrackerAPI.Controllers
                         expense.updated_at
                     })
                     .ToListAsync();
-                    
+
                 return Ok(expenses);
             }
             catch (UnauthorizedAccessException)
@@ -78,7 +78,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var expense = await _context.Expense
-                    .FirstOrDefaultAsync(expense => expense.id == id && expense.user_id == userId);
+                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
                     
                 if (expense == null)
                     return NotFound();
@@ -135,7 +135,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var existingExpense = await _context.Expense
-                    .FirstOrDefaultAsync(expense => expense.id == id && expense.user_id == userId);
+                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
                     
                 if (existingExpense == null)
                     return NotFound();
@@ -163,7 +163,7 @@ namespace ExpenseTrackerAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Expense.Any(e => expense.id == id))
+                if (!_context.Expense.Any(e => e.id == id))
                     return NotFound();
                 else
                     throw;
@@ -178,7 +178,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var expense = await _context.Expense
-                    .FirstOrDefaultAsync(expense => expense.id == id && expense.user_id == userId);
+                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
                     
                 if (expense == null)
                     return NotFound();
