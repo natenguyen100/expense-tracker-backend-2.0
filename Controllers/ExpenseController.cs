@@ -31,16 +31,39 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetExpense")]
-        public async Task<ActionResult<IEnumerable<Expense>>> GetExpense()
+        public async Task<ActionResult<IEnumerable<object>>> GetExpense()
         {
             try
             {
                 var userId = GetCurrentUserId();
                 
-                return await _context.Expense
-                    .Where(e => e.user_id == userId)
-                    .OrderByDescending(e => e.expense_date)
+                var expenses = await _context.Expense
+                    .Where(expense => expense.user_id == userId)
+                    .OrderByDescending(expense => expense.expense_date)
+                    .Select(expense => new
+                    {
+                        expense.id,
+                        expense.user_id,
+                        expense.category_id,
+                        category_name = expense.category_id != null 
+                            ? _context.Category.FirstOrDefault(c => c.id == expense.category_id).name 
+                            : null,
+                        expense.name,
+                        expense.amount,
+                        expense.currency,
+                        expense.description,
+                        expense.expense_date,
+                        expense.payment_method,
+                        expense.receipt_url,
+                        expense.is_recurring,
+                        expense.recurring_frequency,
+                        expense.recurring_end_date,
+                        expense.created_at,
+                        expense.updated_at
+                    })
                     .ToListAsync();
+                    
+                return Ok(expenses);
             }
             catch (UnauthorizedAccessException)
             {
@@ -56,7 +79,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var expense = await _context.Expense
-                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    .FirstOrDefaultAsync(expense => expense.id == id && expense.user_id == userId);
                     
                 if (expense == null)
                     return NotFound();
@@ -113,7 +136,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var existingExpense = await _context.Expense
-                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    .FirstOrDefaultAsync(expense => expense.id == id && expense.user_id == userId);
                     
                 if (existingExpense == null)
                     return NotFound();
@@ -141,7 +164,7 @@ namespace ExpenseTrackerAPI.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!_context.Expense.Any(e => e.id == id))
+                if (!_context.Expense.Any(e => expense.id == id))
                     return NotFound();
                 else
                     throw;
@@ -156,7 +179,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var expense = await _context.Expense
-                    .FirstOrDefaultAsync(e => e.id == id && e.user_id == userId);
+                    .FirstOrDefaultAsync(expense => expense.id == id && expense.user_id == userId);
                     
                 if (expense == null)
                     return NotFound();
