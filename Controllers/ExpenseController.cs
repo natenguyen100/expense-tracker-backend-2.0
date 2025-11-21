@@ -31,14 +31,14 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetExpenses")]
-        public async Task<IActionResult> GetExpense()
+        public async Task<ActionResult<IEnumerable<object>>> GetExpense()
         {
             try
             {
                 var userId = GetCurrentUserId();
                 
                 var expenses = await _context.Expense
-                    .Include(expense => expense.Category)
+                    .Include(e => e.Category)
                     .Where(expense => expense.user_id == userId)
                     .OrderByDescending(expense => expense.expense_date)
                     .Select(expense => new
@@ -46,7 +46,7 @@ namespace ExpenseTrackerAPI.Controllers
                         expense.id,
                         expense.user_id,
                         expense.category_id,
-                        category_name = expense.Category != null ? expense.Category.name : null,
+                        category_name = expense.category_id != null ? expense.Category.name : null,
                         expense.name,
                         expense.amount,
                         expense.currency,
