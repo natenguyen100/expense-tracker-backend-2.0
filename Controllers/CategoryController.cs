@@ -17,7 +17,7 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetCategories")]
-        public async Task<IActionResult> GetCategory()
+        public async Task<IActionResult> GetCategories()
         {
             var categories = await _context.Category.ToListAsync();
             return Ok(categories);
