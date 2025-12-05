@@ -38,7 +38,7 @@ namespace ExpenseTrackerAPI.Controllers
                 var userId = GetCurrentUserId();
                 
                 var expenses = await _context.Expense
-                    .Include(e => e.Category)
+                    .Include(expense => expense.Category)
                     .Where(expense => expense.user_id == userId)
                     .OrderByDescending(expense => expense.expense_date)
                     .Select(expense => new
