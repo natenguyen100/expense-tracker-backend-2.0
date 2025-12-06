@@ -20,10 +20,9 @@ namespace JWTAuth.Models.Controllers
         }
 
         [HttpPost("signin")]
-        public async Task<ActionResult<TokenResponseDto>> SignIn(UserDto request)
+        public async Task<ActionResult<UserResponseDto>> SignIn(UserDto request)
         {
-            Console.WriteLine("signin request", request);
-            var result = await authService.SignInAsync(request);
+            var result = await authService.SignInAsync(request, Response);
             if (result is null)
                 return BadRequest("Invalid username or password.");
 
@@ -31,29 +30,58 @@ namespace JWTAuth.Models.Controllers
         }
 
         [HttpPost("signout")]
-         public async Task<IActionResult> SignOut(SignOutRequestDto request)
+         public async new Task<IActionResult> SignOut()
          {
-            var result = await authService.SignOutAsync(request);
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return BadRequest("No refresh token found.");
+
+            var result = await authService.SignOutAsync(new SignOutRequestDto
+            {
+                RefreshToken = refreshToken
+            });
+
             if (!result)
                 return BadRequest("Logout failed or invalid refresh token.");
+
+            Response.Cookies.Delete("accessToken");
+            Response.Cookies.Delete("refreshToken");
+
             return Ok(new { Message = "Successfully logged out." });
          }
 
         [HttpPost("refresh-token")]
-        public async Task<ActionResult<TokenResponseDto>> RefreshToken(RefreshTokenRequestDto request)
+        public async Task<ActionResult<TokenResponseDto>> RefreshToken()
         {
-            var result = await authService.RefreshTokensAsync(request);
+            var refreshToken = Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+                return Unauthorized("No refresh token found.");
+            
+            var result = await authService.RefreshTokensAsync(new RefreshTokenRequestDto
+            {
+              RefreshToken = refreshToken,
+            });
+
             if (result is null || result.AccessToken is null || result.RefreshToken is null)
                 return Unauthorized("Invalid refresh token.");
             
-            return Ok(result);
-        }
+            Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
+            {
+              HttpOnly = true,
+              Secure = true,
+              SameSite = SameSiteMode.Strict,
+              Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+            });
 
-        [Authorize]
-        [HttpGet]
-        public IActionResult AuthenticatedOnlyEndpoint()
-        {
-            return Ok("You are authenticated!");
+            Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
+            {
+              HttpOnly = true,
+              Secure = true,
+              SameSite = SameSiteMode.Strict,
+              Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
+
+            return Ok(result);
         }
     }
 }

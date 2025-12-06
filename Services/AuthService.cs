@@ -43,7 +43,7 @@ namespace JWTAuth.Services
             return user;
         }
 
-        public async Task<TokenResponseDto?> SignInAsync(UserDto request)
+        public async Task<UserResponseDto?> SignInAsync(UserDto request, HttpResponse response)
         {
             var user = await context.Users.FirstOrDefaultAsync(user => user.email == request.email);
             if (user is null)
@@ -56,7 +56,29 @@ namespace JWTAuth.Services
                 return null;
             }
 
-            return await CreateTokenResponse(user);
+            var tokenResponse = await CreateTokenResponse(user);
+            SetAuthCookies(response, tokenResponse.AccessToken, tokenResponse.RefreshToken);
+
+            return tokenResponse.User;
+        }
+
+        private void SetAuthCookies(HttpResponse response, String accessToken, String refreshToken)
+        {
+            response.Cookies.Append("accessToken", accessToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+            });
+
+            response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddDays(7)
+            });
         }
 
         private async Task<TokenResponseDto> CreateTokenResponse(UserAccount user)
