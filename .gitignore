@@ -2,3 +2,8 @@
 bin/
 obj/
 .DS_Store
+
+# Sensitive configuration files
+appsettings.json
+appsettings.Development.json
+appsettings.*.json
