@@ -16,9 +16,27 @@ namespace ExpenseTrackerAPI.Controllers
         }
 
         [HttpGet("GetBudget")]
-        public async Task<ActionResult<IEnumerable<Budget>>> GetBudget()
+        public async Task<ActionResult<IEnumerable<object>>> GetBudget()
         {
-            return await _context.Budget.ToListAsync();
+            var budgets = await _context.Budget
+                .OrderBy(budget => budget.created_at)
+                .Select(budget => new
+                {
+                    id = budget.id,
+                    user_id = budget.user_id,
+                    category_id = budget.category_id,
+                    name = budget.name,
+                    amount = budget.amount,
+                    created_at = budget.created_at,
+                    updated_at = budget.updated_at,
+                    category_name = _context.Category
+                        .Where(c => c.id == budget.category_id)
+                        .Select(c => c.name)
+                        .FirstOrDefault()
+                })
+                .ToListAsync();
+
+            return budgets;
         }
 
         [HttpGet("{id}")]
@@ -63,6 +81,7 @@ namespace ExpenseTrackerAPI.Controllers
 
             existingBudget.name = budget.name;
             existingBudget.amount = budget.amount;
+            existingBudget.category_id = budget.category_id;
             existingBudget.updated_at = DateTime.UtcNow;
 
             _context.Entry(existingBudget).State = EntityState.Modified;
