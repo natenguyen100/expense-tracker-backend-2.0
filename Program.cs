@@ -10,6 +10,12 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+if (!string.IsNullOrEmpty(jwtSecret))
+{
+    builder.Configuration["AppSettings:Token"] = jwtSecret;
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
