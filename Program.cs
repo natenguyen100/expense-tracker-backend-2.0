@@ -20,7 +20,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(
+            "https://69717c87b1a9c5ace9af29ff--spendar.netlify.app",
+            "https://spendar.netlify.app",
+            "http://localhost:5173",
+            "http://localhost:3000"  
+            )
               .AllowAnyMethod()
               .AllowAnyHeader()
               .AllowCredentials();
@@ -47,12 +52,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true
         };
 
-        // Read JWT token from cookie instead of Authorization header
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                // Try to get the access token from the cookie
+
                 context.Token = context.Request.Cookies["accessToken"];
                 return Task.CompletedTask;
             }
