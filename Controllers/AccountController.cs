@@ -68,16 +68,16 @@ namespace JWTAuth.Models.Controllers
             Response.Cookies.Append("accessToken", result.AccessToken, new CookieOptions
             {
               HttpOnly = true,
-              Secure = false, // Set to true in production with HTTPS
-              SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for cross-origin requests
+              Secure = true,
+              SameSite = SameSiteMode.None,
               Expires = DateTimeOffset.UtcNow.AddMinutes(24)
             });
 
             Response.Cookies.Append("refreshToken", result.RefreshToken, new CookieOptions
             {
               HttpOnly = true,
-              Secure = false, // Set to true in production with HTTPS
-              SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for cross-origin requests
+              Secure = true,
+              SameSite = SameSiteMode.None,
               Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 

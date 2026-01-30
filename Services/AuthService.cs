@@ -67,16 +67,16 @@ namespace JWTAuth.Services
             response.Cookies.Append("accessToken", accessToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // Set to true in production with HTTPS
-                SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for cross-origin requests
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddHours(24) // 24-hour session
             });
 
             response.Cookies.Append("refreshToken", refreshToken, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // Set to true in production with HTTPS
-                SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for cross-origin requests
+                Secure = true,
+                SameSite = SameSiteMode.None,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
         }

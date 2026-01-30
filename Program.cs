@@ -6,9 +6,12 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.Text;
 using ExpenseTrackerAPI.Models;
 
+var builder = WebApplication.CreateBuilder(args);
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-var builder = WebApplication.CreateBuilder(args);
+var connectionString = Environment.GetEnvironmentVariable("NEON_CONNECTION_STRING")
+    ?? builder.Configuration.GetConnectionString("NeonConnection");
 
 var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
 if (!string.IsNullOrEmpty(jwtSecret))
@@ -35,7 +38,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connectionString));
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
