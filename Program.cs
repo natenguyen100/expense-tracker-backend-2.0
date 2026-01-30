@@ -19,6 +19,18 @@ if (!string.IsNullOrEmpty(jwtSecret))
     builder.Configuration["AppSettings:Token"] = jwtSecret;
 }
 
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER");
+if (!string.IsNullOrEmpty(jwtIssuer))
+{
+    builder.Configuration["AppSettings:Issuer"] = jwtIssuer;
+}
+
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE");
+if (!string.IsNullOrEmpty(jwtAudience))
+{
+    builder.Configuration["AppSettings:Audience"] = jwtAudience;
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
