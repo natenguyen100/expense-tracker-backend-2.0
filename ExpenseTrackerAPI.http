@@ -1,6 +1,0 @@
-@ExpenseTrackerAPI_HostAddress = http://localhost:5208
-
-GET {{ExpenseTrackerAPI_HostAddress}}/
-Accept: application/json
-
-###
